@@ -35,9 +35,16 @@ bool FBullCowGame::IsGameWon(FBullCowCount BullCowCount) const
 	return BullCowCount.Bulls == HiddenWord.length();
 }
 
-bool FBullCowGame::IsGuessValid(FString Guess) const
+EWordStatus FBullCowGame::CheckGuessValidity(FString Guess) const
 {
-	return (IsIsogram(Guess) && Guess.length() == HiddenWord.length());
+	if (!IsIsogram(Guess))
+		return EWordStatus::NOT_ISOGRAM;
+	if (Guess.length() < HiddenWord.length())
+		return EWordStatus::TOO_SHORT;
+	if (Guess.length() > HiddenWord.length())
+		return EWordStatus::TOO_LARGE;
+	if (Guess.length() == HiddenWord.length())
+		return EWordStatus::OK;
 }
 
 bool FBullCowGame::IsIsogram(FString Guess) const

@@ -45,7 +45,7 @@ void PlayGame()
 	while ((BCGame.GetCurrentTry() != MaxTries) && !bGameWon) 
 	{
 		FText Guess = GetGuess();
-		if (!BCGame.IsGuessValid(Guess))
+		switch (!BCGame.CheckGuessValidity(Guess)) // TODO transform to SWITCH with error cases
 			std::cout << "Not a valid guess! It must have " << HiddenWordLength << " letters and be an isogram (no repeating letters)" << std::endl;
 		else
 		{
