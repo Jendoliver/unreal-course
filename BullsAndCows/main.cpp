@@ -45,17 +45,21 @@ void PlayGame()
 	while ((BCGame.GetCurrentTry() != MaxTries) && !bGameWon) 
 	{
 		FText Guess = GetGuess();
-		switch (!BCGame.CheckGuessValidity(Guess)) // TODO transform to SWITCH with error cases
-			std::cout << "Not a valid guess! It must have " << HiddenWordLength << " letters and be an isogram (no repeating letters)" << std::endl;
-		else
+		switch (BCGame.CheckGuessValidity(Guess)) // TODO transform to SWITCH with error cases
 		{
-			FBullCowCount BullCowCount = BCGame.SubmitGuess(Guess);
-			bGameWon = BCGame.IsGameWon(BullCowCount);
-			if (!bGameWon)
+			case EWordStatus::NOT_ISOGRAM: std::cout << "Xavalado te he dive ISOGRAMA! Tu palabro no es un isograma (no se pode repeat letras)..." << std::endl; break;
+			case EWordStatus::TOO_LARGE: std::cout << "Xavalada la noche es nuestra vaya palabro mas largo pedazo de kpuyo! Plix escribe un palabro de " << HiddenWordLength << " letras..." << std::endl; break;
+			case EWordStatus::TOO_SHORT: std::cout << "Xavaliyo ke tas kedao corto con las letras! Plix escribe un palabro de " << HiddenWordLength << " letras..." << std::endl; break;
+			case EWordStatus::OK: 
 			{
-				std::cout << "Bulla = " << BullCowCount.Bulls;
-				std::cout << ". Cowa = " << BullCowCount.Cows;
-				std::cout << std::endl;
+				FBullCowCount BullCowCount = BCGame.SubmitGuess(Guess);
+				bGameWon = BCGame.IsGameWon(BullCowCount);
+				if (!bGameWon)
+				{
+					std::cout << "Bulla = " << BullCowCount.Bulls;
+					std::cout << ". Cowa = " << BullCowCount.Cows;
+					std::cout << std::endl;
+				}
 			}
 		}
 	}	
