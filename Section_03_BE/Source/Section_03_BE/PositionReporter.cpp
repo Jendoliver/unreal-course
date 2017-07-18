@@ -19,8 +19,9 @@ void UPositionReporter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
-	
+	FString ObjectName = GetOwner()->GetName();
+	FVector ObjectPos = GetOwner()->GetActorLocation();
+	UE_LOG(LogTemp, Warning, TEXT("%s is at pos (%d, %d, %d)"), *ObjectName, ObjectPos.X, ObjectPos.Y, ObjectPos.Z);
 }
 
 
