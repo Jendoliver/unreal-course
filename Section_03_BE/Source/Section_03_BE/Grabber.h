@@ -16,6 +16,8 @@ class SECTION_03_BE_API UGrabber : public UActorComponent
 		APlayerController* PlayerController;
 		FVector PlayerViewPointLocation;
 		FRotator PlayerViewPointRotation;
+		UPROPERTY(EditAnywhere) // How far the player can reach
+			float Reach = 50.f;
 
 	protected:
 		// Called when the game starts
