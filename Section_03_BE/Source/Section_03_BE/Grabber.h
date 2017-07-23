@@ -11,15 +11,18 @@ class SECTION_03_BE_API UGrabber : public UActorComponent
 {
 	GENERATED_BODY()
 
-	public:	
+	private:	
 		// Sets default values for this component's properties
-		UGrabber();
+		APlayerController* PlayerController;
+		FVector PlayerViewPointLocation;
+		FRotator PlayerViewPointRotation;
 
 	protected:
 		// Called when the game starts
 		virtual void BeginPlay() override;
 
 	public:	
+		UGrabber();
 		// Called every frame
 		virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
