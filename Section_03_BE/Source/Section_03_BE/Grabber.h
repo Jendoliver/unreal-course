@@ -12,19 +12,28 @@ class SECTION_03_BE_API UGrabber : public UActorComponent
 	GENERATED_BODY()
 
 	private:	
-		// Sets default values for this component's properties
 		APlayerController* PlayerController;
-
 		FVector PlayerViewPointLocation;
 		FRotator PlayerViewPointRotation;
-		UPROPERTY(EditAnywhere) // How far the player can reach
+		FVector LineTraceEnd;
+		UPROPERTY(EditAnywhere)
 			float Reach = 100.f;
 
 		UPhysicsHandleComponent* PhysicsHandle = nullptr;
 		UInputComponent* InputComponent = nullptr;
 
+		/// Called-by-input functions
 		void Grab();
+		FHitResult GetFirstPhysicsBodyInReach() const;
 		void Release();
+
+		/// Component search
+		void FindPhysicsHandleComponent();
+		void FindInputComponent(); // Calls BindInputActions if it finds an InputComponent
+		void BindInputActions();
+
+		/// Debug tools
+		void DrawGrabReachLine();
 
 	protected:
 		// Called when the game starts
