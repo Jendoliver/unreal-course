@@ -11,8 +11,6 @@ UGrabber::UGrabber()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
 }
 
 // Called when the game starts
@@ -29,12 +27,10 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	PlayerController->GetPlayerViewPoint(OUT PlayerViewPointLocation, OUT PlayerViewPointRotation); // Get location and rotation of the player
-	LineTraceEnd = PlayerViewPointLocation + PlayerViewPointRotation.Vector() * Reach; // Calculates the end of the line
-
 	if (PhysicsHandle->GrabbedComponent)
 	{
-		PhysicsHandle->SetTargetLocation(LineTraceEnd);
+		RefreshReachLine();
+		PhysicsHandle->SetTargetLocation(GetReachLineEnd());
 	}
 }
 
@@ -42,13 +38,8 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 // Sets the PhysicsHandle*
 void UGrabber::FindPhysicsHandleComponent()
 {
-	/// Look for attached PhysicsHandle
 	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
-	if (PhysicsHandle)
-	{
-		/// Physics handle found
-	}
-	else
+	if (PhysicsHandle == nullptr)
 	{
 		UE_LOG(LogTemp, Error, TEXT("%s doesn't have a PhysicsHandle component attached to it"), *(GetOwner()->GetName()))
 	}
@@ -57,11 +48,9 @@ void UGrabber::FindPhysicsHandleComponent()
 // Sets the InputComponent* and calls BindInputActions on success
 void UGrabber::FindInputComponent()
 {
-	/// Look for attached Input Component
 	InputComponent = GetOwner()->FindComponentByClass<UInputComponent>();
 	if (InputComponent)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("InputComponent attached"), *(GetOwner()->GetName()));
 		BindInputActions();
 	}
 	else
@@ -73,47 +62,53 @@ void UGrabber::FindInputComponent()
 // Maps the action events
 void UGrabber::BindInputActions()
 {
-	/// Bind the input actions to the method
 	InputComponent->BindAction("Grab", EInputEvent::IE_Pressed, this, &UGrabber::Grab);
 	InputComponent->BindAction("Grab", EInputEvent::IE_Released, this, &UGrabber::Release);
 }
 
 ///***** TickComponent METHODS *****///
+// Refreshes LineTrace begin and end
+void UGrabber::RefreshReachLine()
+{
+	PlayerController->GetPlayerViewPoint(OUT UGrabber::ReachLine.Begin, OUT PlayerViewPointRotation); // Get location and rotation of the player
+	UGrabber::ReachLine.End = GetReachLineBegin() + PlayerViewPointRotation.Vector() * Reach; // Calculates the end of the line
+}
+
 // Called on F press, calls GetFirstPhysicsBodyInReach
 void UGrabber::Grab()
 {
 	UE_LOG(LogTemp, Warning, TEXT("GRAB"));
 
 	/// Try and reach any actors with physics body collision channel set
-	FHitResult Hit = GetFirstPhysicsBodyInReach();
+	FHitResult HitResult = GetFirstPhysicsBodyInReach();
 
 	/// If we hit something then attach that to the physics handle
-	if (Hit.GetActor())
+	if (HitResult.GetActor())
 	{
 		PhysicsHandle->GrabComponentAtLocationWithRotation(
-			Hit.GetComponent(),
-			NAME_None,
-			Hit.GetComponent()->GetOwner()->GetActorLocation(),
-			Hit.GetComponent()->GetOwner()->GetActorRotation()
+			HitResult.GetComponent(),
+			NAME_None, // No bones needed
+			HitResult.GetComponent()->GetOwner()->GetActorLocation(),
+			HitResult.GetComponent()->GetOwner()->GetActorRotation()
 		);
 	}
 }
 
 // Traces a line searching for the first PhysicsBody in Reach
-FHitResult UGrabber::GetFirstPhysicsBodyInReach() const
+FHitResult UGrabber::GetFirstPhysicsBodyInReach()
 {
+	RefreshReachLine();
 	/// Setup query parameters
 	FCollisionQueryParams TraceParameters(FName(TEXT("")), false, GetOwner()); // We don't worry about the tag (first arg), we DON'T WANT to collide with the complex mesh (2nd) and we ignore ourselves (3rd)
 
 	FHitResult Hit;
 	GetWorld()->LineTraceSingleByObjectType(
 		OUT Hit,															// Hit: the variable holding the response on what we hit
-		PlayerViewPointLocation,											// Beginning of the line
-		LineTraceEnd,														// End of the line
+		GetReachLineBegin(),												// Beginning of the line
+		GetReachLineEnd(),													// End of the line
 		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),	// Object Type the line will collide with
 		TraceParameters														// Query parameters
 	);
-
 	return Hit;
 }
 
@@ -130,8 +125,8 @@ void UGrabber::DrawGrabReachLine()
 {
 	DrawDebugLine(
 		GetWorld(),
-		PlayerViewPointLocation,
-		LineTraceEnd,
+		GetReachLineBegin(),
+		GetReachLineEnd(),
 		FColor::Red,
 		false,
 		0.f,

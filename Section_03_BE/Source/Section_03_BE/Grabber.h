@@ -13,9 +13,13 @@ class SECTION_03_BE_API UGrabber : public UActorComponent
 
 	private:	
 		APlayerController* PlayerController;
-		FVector PlayerViewPointLocation;
 		FRotator PlayerViewPointRotation;
-		FVector LineTraceEnd;
+		struct FReachLine
+		{
+			FVector Begin;
+			FVector End;
+		} ReachLine;
+
 		UPROPERTY(EditAnywhere)
 			float Reach = 100.f;
 
@@ -24,7 +28,7 @@ class SECTION_03_BE_API UGrabber : public UActorComponent
 
 		/// Called-by-input functions
 		void Grab();
-		FHitResult GetFirstPhysicsBodyInReach() const;
+		FHitResult GetFirstPhysicsBodyInReach();
 		void Release();
 
 		/// Component search
@@ -44,4 +48,8 @@ class SECTION_03_BE_API UGrabber : public UActorComponent
 		UGrabber();
 		// Called every frame
 		virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+		inline FReachLine GetLineTrace() { return ReachLine; }
+		inline FVector GetReachLineBegin() { return ReachLine.Begin; }
+		inline FVector GetReachLineEnd() { return ReachLine.End; }
+		void RefreshReachLine();
 };
