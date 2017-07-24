@@ -15,13 +15,46 @@ UGrabber::UGrabber()
 	// ...
 }
 
+void UGrabber::Grab()
+{
+	UE_LOG(LogTemp, Warning, TEXT("GRAB"))
+}
+
+void UGrabber::Release()
+{
+	UE_LOG(LogTemp, Warning, TEXT("RELEASE"))
+}
 
 // Called when the game starts
 void UGrabber::BeginPlay()
 {
 	Super::BeginPlay();
 	PlayerController = GetWorld()->GetFirstPlayerController();
-	UE_LOG(LogTemp, Warning, TEXT("Grabber reporting for duty!"));
+
+	/// Look for attached Physics Handle
+	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
+	if (PhysicsHandle)
+	{
+
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s doesn't have a Physics Handle Component attached"), *(GetOwner()->GetName()));
+	}
+
+	/// Look for attached Input Component
+	InputComponent = GetOwner()->FindComponentByClass<UInputComponent>();
+	if (InputComponent)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("InputComponent attached"), *(GetOwner()->GetName()));
+		/// Bind the input actions to the method
+		InputComponent->BindAction("Grab", EInputEvent::IE_Pressed, this, &UGrabber::Grab);
+		InputComponent->BindAction("Grab", EInputEvent::IE_Released, this, &UGrabber::Release);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s doesn't have a Input Component attached"), *(GetOwner()->GetName()));
+	}
 }
 
 
@@ -29,12 +62,8 @@ void UGrabber::BeginPlay()
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	PlayerController->GetPlayerViewPoint(OUT PlayerViewPointLocation, OUT PlayerViewPointRotation);
-	UE_LOG(LogTemp, Warning, TEXT("Viewpoint position: %s , Viewpoint rotation: %s"), 
-		*PlayerViewPointLocation.ToString(),
-		*PlayerViewPointRotation.ToString()
-	);
 
+	PlayerController->GetPlayerViewPoint(OUT PlayerViewPointLocation, OUT PlayerViewPointRotation); // Get location and rotation of the player
 	FVector LineTraceEnd = PlayerViewPointLocation + PlayerViewPointRotation.Vector() * Reach; // Calculates the end of the line
 
 	/// Draw a red line in the world to visualize
@@ -62,7 +91,7 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 		TraceParameters														// Query parameters
 	);
 
-	/// See what we hit, if it's valid log it
+	/// See what we hit, if we hit something log it
 	AActor* HitActor = Hit.GetActor();
 	if (HitActor)
 	{

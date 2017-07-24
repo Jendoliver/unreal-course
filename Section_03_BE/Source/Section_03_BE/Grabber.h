@@ -14,20 +14,25 @@ class SECTION_03_BE_API UGrabber : public UActorComponent
 	private:	
 		// Sets default values for this component's properties
 		APlayerController* PlayerController;
+
 		FVector PlayerViewPointLocation;
 		FRotator PlayerViewPointRotation;
 		UPROPERTY(EditAnywhere) // How far the player can reach
 			float Reach = 100.f;
 
+		UPhysicsHandleComponent* PhysicsHandle = nullptr;
+		UInputComponent* InputComponent = nullptr;
+
+		void Grab();
+		void Release();
+
 	protected:
 		// Called when the game starts
 		virtual void BeginPlay() override;
 
-	public:	
+	public:
+
 		UGrabber();
 		// Called every frame
 		virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
-		
-	
 };
