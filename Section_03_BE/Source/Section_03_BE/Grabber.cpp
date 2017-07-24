@@ -3,6 +3,8 @@
 #include "Section_03_BE.h"
 #include "Grabber.h"
 
+#define OUT
+
 // Sets default values for this component's properties
 UGrabber::UGrabber()
 {
@@ -27,14 +29,15 @@ void UGrabber::BeginPlay()
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	PlayerController->GetPlayerViewPoint(PlayerViewPointLocation, PlayerViewPointRotation);
+	PlayerController->GetPlayerViewPoint(OUT PlayerViewPointLocation, OUT PlayerViewPointRotation);
 	UE_LOG(LogTemp, Warning, TEXT("Viewpoint position: %s , Viewpoint rotation: %s"), 
 		*PlayerViewPointLocation.ToString(),
 		*PlayerViewPointRotation.ToString()
 	);
 
-	FVector LineTraceEnd = PlayerViewPointLocation + PlayerViewPointRotation.Vector() * Reach;
-	// Draw a red line in the world to visualize
+	FVector LineTraceEnd = PlayerViewPointLocation + PlayerViewPointRotation.Vector() * Reach; // Calculates the end of the line
+
+	/// Draw a red line in the world to visualize
 	DrawDebugLine(
 		GetWorld(), 
 		PlayerViewPointLocation, 
@@ -46,8 +49,24 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 		10.f
 		);
 
-	// Ray-cast out to reach distance
+	/// Setup query parameters
+	FCollisionQueryParams TraceParameters(FName(TEXT("")), false, GetOwner()); // We don't worry about the tag (first arg), we DON'T WANT to collide with the complex mesh (2nd) and we ignore ourselves (3rd)
 
-	// See what we hit
+	/// Ray-cast out to reach distance
+	FHitResult Hit;
+	GetWorld()->LineTraceSingleByObjectType(
+		OUT Hit,															// Hit: the variable holding the response on what we hit
+		PlayerViewPointLocation,											// Beginning of the line
+		LineTraceEnd,														// End of the line
+		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),	// Object Type the line will collide with
+		TraceParameters														// Query parameters
+	);
+
+	/// See what we hit, if it's valid log it
+	AActor* HitActor = Hit.GetActor();
+	if (HitActor)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Object hit: %s"), *(HitActor->GetName()))
+	}
 }
 
