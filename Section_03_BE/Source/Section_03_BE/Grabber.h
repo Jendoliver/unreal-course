@@ -48,8 +48,8 @@ class SECTION_03_BE_API UGrabber : public UActorComponent
 		UGrabber();
 		// Called every frame
 		virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-		inline FReachLine GetLineTrace() { return ReachLine; }
-		inline FVector GetReachLineBegin() { return ReachLine.Begin; }
-		inline FVector GetReachLineEnd() { return ReachLine.End; }
+		inline FReachLine GetLineTrace() const { return ReachLine; }
+		inline FVector GetReachLineBegin() const { return ReachLine.Begin; }
+		inline FVector GetReachLineEnd() const { return ReachLine.End; }
 		void RefreshReachLine();
 };
