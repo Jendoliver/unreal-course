@@ -21,7 +21,7 @@ class SECTION_03_BE_API UGrabber : public UActorComponent
 		} ReachLine;
 
 		UPROPERTY(EditAnywhere)
-			float Reach = 100.f;
+			float Reach = 110.f;
 
 		UPhysicsHandleComponent* PhysicsHandle = nullptr;
 		UInputComponent* InputComponent = nullptr;
