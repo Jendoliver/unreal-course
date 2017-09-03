@@ -20,12 +20,15 @@ void UGrabber::BeginPlay()
 	PlayerController = GetWorld()->GetFirstPlayerController();
 	FindPhysicsHandleComponent();
 	FindInputComponent();
+	BindInputActions();
 }
 
 // Called every frame
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (!PhysicsHandle) { return; } // Pointer protection
 
 	if (PhysicsHandle->GrabbedComponent)
 	{
@@ -45,15 +48,10 @@ void UGrabber::FindPhysicsHandleComponent()
 	}
 }
 
-// Sets the InputComponent* and calls BindInputActions on success
 void UGrabber::FindInputComponent()
 {
 	InputComponent = GetOwner()->FindComponentByClass<UInputComponent>();
-	if (InputComponent)
-	{
-		BindInputActions();
-	}
-	else
+	if (InputComponent == nullptr)
 	{
 		UE_LOG(LogTemp, Error, TEXT("%s doesn't have a Input Component attached"), *(GetOwner()->GetName()));
 	}
@@ -62,6 +60,7 @@ void UGrabber::FindInputComponent()
 // Maps the action events
 void UGrabber::BindInputActions()
 {
+	if (!InputComponent) { return; } // Pointer protection
 	InputComponent->BindAction("Grab", EInputEvent::IE_Pressed, this, &UGrabber::Grab);
 	InputComponent->BindAction("Grab", EInputEvent::IE_Released, this, &UGrabber::Release);
 }
@@ -77,6 +76,8 @@ void UGrabber::RefreshReachLine()
 // Called on F press, calls GetFirstPhysicsBodyInReach
 void UGrabber::Grab()
 {
+	if (!PhysicsHandle) { return; } // Pointer protection
+
 	UE_LOG(LogTemp, Warning, TEXT("GRAB"));
 
 	/// Try and reach any actors with physics body collision channel set
@@ -115,6 +116,8 @@ FHitResult UGrabber::GetFirstPhysicsBodyInReach()
 // Called on F release
 void UGrabber::Release()
 {
+	if (!PhysicsHandle) { return; } // Pointer protection
+
 	UE_LOG(LogTemp, Warning, TEXT("RELEASE"));
 	PhysicsHandle->ReleaseComponent();
 }

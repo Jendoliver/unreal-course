@@ -12,7 +12,7 @@ class SECTION_03_BE_API UGrabber : public UActorComponent
 	GENERATED_BODY()
 
 	private:	
-		APlayerController* PlayerController;
+		APlayerController* PlayerController = nullptr;
 		FRotator PlayerViewPointRotation;
 		struct FReachLine
 		{
@@ -33,7 +33,7 @@ class SECTION_03_BE_API UGrabber : public UActorComponent
 
 		/// Component search
 		void FindPhysicsHandleComponent();
-		void FindInputComponent(); // Calls BindInputActions if it finds an InputComponent
+		void FindInputComponent();
 		void BindInputActions();
 
 		/// Debug tools
